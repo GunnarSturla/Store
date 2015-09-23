@@ -2,35 +2,15 @@ var store,
     dispatcher,
     destroyed;
 
-var setup = function() {
-  dispatcher = {
-    registered: 0,
-
-    register: function (callback) {
-      this.actionCallbacks = callback;
-      this.registered++;
-      return this.registered;
-    },
-    unregister: function () {
-      this.registered--;
-    }
-
-  };
-
-
-  store = new Store('testStore', dispatcher);
-
-  store.onCreated(function() {
-
-    this.count = 0;
-
-  });
+var defineHelpers = function() {
   store.helpers({
     getCount: function() {
       return this.count;
     }
   });
+};
 
+var defineActions = function() {
   store.actions({
     increment: function() {
       this.count++;
@@ -39,13 +19,59 @@ var setup = function() {
       this.count = this.count + n;
     }
   });
+};
+
+var initDisp = function() {
+  return {
+    registered: 0,
+
+    register: function (callback) {
+      this.actionCallbacks = callback;
+      this.registered++;
+
+      return this.registered;
+    },
+    unregister: function () {
+      this.registered--;
+    }
+
+  }
+};
+
+
+var setup = function() {
+  dispatcher = initDisp();
+
+  store = new Store('testStore', dispatcher);
+
+  store.onCreated(function() {
+    this.count = 0;
+  });
+
+  defineHelpers();
+  defineActions();
 
   store.onDestroyed(function() {
     destroyed++;
   });
 
   destroyed = 0;
+};
 
+var setupDifferent = function() {
+  dispatcher = initDisp();
+
+  store = new Store('testStore', dispatcher);
+
+  store.onCreated(function() {
+    this.count = 0;
+  });
+
+  store.onDestroyed(function() {
+    destroyed++;
+  });
+
+  destroyed = 0;
 };
 
 var create = function() {
@@ -93,6 +119,28 @@ Tinytest.add('Store - should get created correctly', function (test) {
   test.equal(dispatcher.registered, 0);
 
   create();
+
+  test.equal(store.count, 0);
+  test.isNotUndefined(store.getCount);
+  test.isTrue(store.created(),'created function should be true');
+  test.equal(dispatcher.registered, 1, 'if store has registered with dispatcher');
+
+  teardown();
+});
+
+Tinytest.add('Store - should get register helpers and actions when create is ' +
+    'called before helpers and actions are defined', function (test) {
+
+  setupDifferent();
+  create();
+
+  test.equal(store.count, 0);
+  test.isUndefined(store.getCount);
+  test.isTrue(store.created());
+  test.equal(dispatcher.registered, 0);
+
+  defineHelpers();
+  defineActions();
 
   test.equal(store.count, 0);
   test.isNotUndefined(store.getCount);

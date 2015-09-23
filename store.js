@@ -1,5 +1,6 @@
 /**
- * @summary Store... more is coming
+ * @summary Stores manage the app state (variables and collections), exposes it with
+ * helpers, and recieve dispatches from the dispatcher.
  *
  * This store partly implements [Facebook's example store](https://facebook.github.io/flux/docs/flux-utils.html#store)
  * @class
@@ -12,6 +13,7 @@ Store = function(name, dispatcher) {
 	var self = this;
 	self.name = name;
 	self._dispatcher = dispatcher;
+	self._created = false;
 
 	self._tokenId = null;
 	self._subsHandles = null;
@@ -47,6 +49,13 @@ Store.prototype = {
 		_.each(actions, function(action, key) {
 			self._actions[key] = _.bind(action, self);
 		});
+
+		// Register actions is the store has already been initiated
+		// This happens if create() is called before the actions are
+		// defined
+		if(this._created && !self._tokenId) {
+			self._tokedId = self._registerActions();
+		}
 	},
 
 	/**
@@ -90,7 +99,7 @@ Store.prototype = {
 	},
 
 	/**
-	 * @summary Returns the dispatch token that the dispatcher recognizes
+	 * Returns the dispatch token that the dispatcher recognizes
 	 * this store by. Can be used to waitFor() this store.
 	 * @namespace Store.getDispatchTokes
 	 * @returns {String} tokenId
@@ -109,6 +118,11 @@ Store.prototype = {
 		var self = this;
 
 		self._helpers = helpers;
+
+		// Register helpers is the store has already been initiated
+		if(this._created) {
+			self._registerHelpers();
+		}
 	},
 
 	/**
@@ -151,8 +165,12 @@ Store.prototype = {
 			func();
 		});
 
-		self._registerActions();
-		self._tokenId =  self._registerHelpers();
+		// Only register if actions have been declared
+		if(!self._tokenId && self._actions) {
+			self._tokenId = self._registerActions();
+		}
+		self._registerHelpers();
+		self._created = true;
 	},
 
 	/**
@@ -177,9 +195,6 @@ Store.prototype = {
 		self._dispatcher.unregister(self._tokenId);
 		self._tokenId = null;
 
-		// Unsubscribe from any subscriptions
-        //
-
 		// Reset all functions and whatever else the store has set
 		var important = ['name','_actions', '_dispatcher', '_helpers', '_onCreated', '_onDestroyed', '__proto__'];
 		_.each(self, function(value, key, list) {
@@ -191,6 +206,8 @@ Store.prototype = {
 				self[key] = undefined;
 			}
 		});
+
+		self._created = false;
 	},
 
 
@@ -203,6 +220,10 @@ Store.prototype = {
 	 */
 	onCreated: function(callback) {
 		this._onCreated.push(callback);
+
+		if(this._created) {
+			callback();
+		}
 	},
 
 	/**
@@ -217,22 +238,17 @@ Store.prototype = {
 
 	/**
 	 * @summary Checks whether the store has been created
+	 * @returns {boolean}
+	 * @namespace Store.created
+	 * @example
 	 * ```
 	 * if(!CounterStore.created()) {
 	 *     CounterStore.create();
 	 * }
 	 * ```
-	 * @returns {boolean}
-	 * @namespace Store.created
-	 * @example
-	 *
-	 * <pre>if(!CounterStore.created()) {
-	 *     CounterStore.create();
-	 * }</pre>
-	 *
 	 */
 	created: function() {
-		return !_.isNull(this._tokenId);
+		return this._created;
 	},
 
 
