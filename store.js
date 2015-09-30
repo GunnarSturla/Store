@@ -1,3 +1,30 @@
+/*
+Flux Store for Meteor
+
+Licenced under the MIT License
+
+  Copyright (c) 2015 Gunnar Sturla Ágústuson - gunnar@gunnarsturla.com github.com/GunnarSturla
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+*/
+
 /**
  * @summary Stores manage the app state (variables and collections), exposes it with
  * helpers, and recieve dispatches from the dispatcher.
@@ -6,10 +33,12 @@
  * @class
  * @param {String} name
  * @param {Dispatcher} dispatcher
+ * @param {Boolean} [autocreate] If set to false, you need to call `store.create()` to
+ * create the store
  * @constructor
  */
 
-Store = function(name, dispatcher) {
+Store = function(name, dispatcher, autocreate) {
 	var self = this;
 	self.name = name;
 	self._dispatcher = dispatcher;
@@ -24,6 +53,10 @@ Store = function(name, dispatcher) {
 
 	self._actions = null;
 	self._helpers = null;
+
+	if(typeof autocreate === 'undefined' || autocreate) {
+		this.create();
+	}
 };
 Store.prototype = {
 
@@ -222,7 +255,8 @@ Store.prototype = {
 		this._onCreated.push(callback);
 
 		if(this._created) {
-			callback();
+			var cb = _.bind(callback, this);
+			cb();
 		}
 	},
 
@@ -249,70 +283,5 @@ Store.prototype = {
 	 */
 	created: function() {
 		return this._created;
-	},
-
-
-
-
-
-	/**
-	 * Subscribe to a record set. Returns a handle that provides stop() and ready() methods.
-	 *   Similar to template subscriptions in that they are destroyed when the store is.
-	 *
-	 * Note: Store subscriptions are still under development and are not ready for use
-	 * @locus Client
-	 * @param {String} name Name of the subscription.  Matches the name of the
-	 * server's `publish()` call.
-	 * @param {Any} [arg1,arg2...] Optional arguments passed to publisher
-	 * function on server.
-	 * @param {Function|Object} [callbacks] Optional. May include `onStop`
-	 * and `onReady` callbacks. If there is an error, it is passed as an
-	 * argument to `onStop`. If a function is passed instead of an object, it
-	 * is interpreted as an `onReady` callback.
-	 * @returns {Object} Handle that provides stop() and ready() methods.
-	 * @namespace Store.subscribe
-	 */
-	subscribe: function (/* args */) {
-		var self = this;
-		var name = arguments[0];
-		var args = Array.prototype.slice.call(arguments, 1);
-		// initiate _subsHandles if it doesn't exist yet
-		if(!self._subsHandles) {
-			self._subsHandles = [];
-		}
-
-
-		// Is there an existing sub with the same name and param, run in an
-		// invalidated Computation? This will happen if we are rerunning an
-		// existing computation.
-		var exists = _.find(self._subsHandles, function (sub) {
-			return sub.inactive && sub.name === name &&
-				EJSON.equals(sub.params, params);
-		});
-
-		var handle = Meteor.subscribe.apply(this, arguments);
-
-		self._subsReady = false;
-		self._subsHandles.push(handle);
-		console.log('subscribing: ' + name + ' ' + self._subsHandles.length);
-		// The problem seems to be that the subscription is rerun, and gets added
-		// to the array, but shouldn't be. But if the sub isn't coming
-		// from a reactive source, then it should be. Look at how Meteor.subscribe
-		// does it
-
-		return handle;
-	},
-
-	subscriptionsReady: function() {
-		var self = this;
-		Tracker.autorun(function() {
-			console.log('sr');
-			console.log(self._subsReady);
-			self._subsReady = _.any(self._subsHandles, function(sub) {
-				console.log(sub.ready());
-				return sub.ready() } );
-		});
-
-		return self._subsReady;
 	}
 };

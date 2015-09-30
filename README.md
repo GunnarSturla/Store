@@ -1,6 +1,6 @@
 # Flux Store for Meteor
 
-This package adds a Store class to simplify following Facebook's Flux architecture.
+This package adds a Store class to simplify following Facebook's Flux architecture in Meteor.
 The store manages the app state by taking dispatches from the dispatcher, updating
 the app state and exposing helpers for views/templates to include.
 
@@ -23,10 +23,14 @@ versions is that the modified version allows dispatch calls to be made in a more
 "Meteor-like" way by calling `Dispatcher.dispatch('action_performed', data);`
 
 ### Store
-Manages the app state. It recieves dispatches from the dispatcher, acts on them (by changing the app state)
-and updates the views
+Manage the app state. Stores receive dispatches from the dispatcher, acts on them (by changing the app state)
+and updates the views. In React, views add listeners to the store to get notified of changes, but with
+Meteor's reactivity that is unnecessary. All we need is to call the store's helper from a template
+and Meteor/Blaze will take care of updates for us.
 
+### Actions
 
+### More reading
 I recommend reading [Facebook's Flux overview](https://facebook.github.io/flux/docs/overview.html) to get a feeling for it.
 
 ## Using Flux Store for Meteor
@@ -105,3 +109,6 @@ PlayerStore.actions({
 Similar to `Template.myTemplate.onDestroyed` it gets called when the store is destroyed.
 
 
+## License
+
+This package is released under the [MIT License](https://opensource.org/licenses/MIT).
