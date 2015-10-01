@@ -192,18 +192,20 @@ Store.prototype = {
 	create: function() {
 		var self = this;
 
-		// Run onCreated functions
-		_.each(self._onCreated, function(cb){
-			var func = _.bind(cb, self);
-			func();
-		});
+		if(!self._created) {
+			// Run onCreated functions
+			_.each(self._onCreated, function (cb) {
+				var func = _.bind(cb, self);
+				func();
+			});
 
-		// Only register if actions have been declared
-		if(!self._tokenId && self._actions) {
-			self._tokenId = self._registerActions();
+			// Only register if actions have been declared
+			if (!self._tokenId && self._actions) {
+				self._tokenId = self._registerActions();
+			}
+			self._registerHelpers();
+			self._created = true;
 		}
-		self._registerHelpers();
-		self._created = true;
 	},
 
 	/**

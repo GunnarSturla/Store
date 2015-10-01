@@ -1,6 +1,7 @@
 var store,
     dispatcher,
-    destroyed;
+    destroyed,
+    created;
 
 var defineHelpers = function() {
   store.helpers({
@@ -41,12 +42,14 @@ var initDisp = function() {
 
 var setup = function() {
   dispatcher = initDisp();
+  destroyed = 0;
+  created = 0;
 
   store = new Store('testStore', dispatcher);
 
   store.onCreated(function() {
-    console.log(this);
     this.count = 0;
+    created++;
   });
 
   defineHelpers();
@@ -55,33 +58,35 @@ var setup = function() {
   store.onDestroyed(function() {
     destroyed++;
   });
-
-  destroyed = 0;
 };
 
 var setupDontSetHelpersActions = function() {
   dispatcher = initDisp();
+  destroyed = 0;
+  created = 0;
 
   store = new Store('testStore', dispatcher);
 
   store.onCreated(function() {
     this.count = 0;
+    created++;
   });
 
   store.onDestroyed(function() {
     destroyed++;
   });
-
-  destroyed = 0;
 };
 
 var setupDontCreate = function() {
   dispatcher = initDisp();
+  destroyed = 0;
+  created = 0;
 
   store = new Store('testStore', dispatcher, false);
 
   store.onCreated(function() {
     this.count = 0;
+    created++;
   });
 
   defineHelpers();
@@ -90,8 +95,6 @@ var setupDontCreate = function() {
   store.onDestroyed(function() {
     destroyed++;
   });
-
-  destroyed = 0;
 };
 
 var create = function() {
@@ -135,6 +138,7 @@ Tinytest.add('Store - should get created correctly', function (test) {
   test.equal(store.count, 0);
   test.isNotUndefined(store.getCount);
   test.isTrue(store.created(),'created function should be true');
+  test.equal(created, 1);
   test.equal(dispatcher.registered, 1, 'if store has registered with dispatcher');
 
   teardown();
@@ -158,7 +162,7 @@ Tinytest.add('Store - should get created correctly if autocreate is false', func
   teardown();
 });
 
-Tinytest.add('Store - should get register helpers and actions when create is ' +
+Tinytest.add('Store - should register helpers and actions when create is ' +
     'called before helpers and actions are defined', function (test) {
 
   setupDontSetHelpersActions();
@@ -171,6 +175,28 @@ Tinytest.add('Store - should get register helpers and actions when create is ' +
   defineHelpers();
   defineActions();
 
+  test.equal(store.count, 0);
+  test.isNotUndefined(store.getCount);
+  test.isTrue(store.created(),'created function should be true');
+  test.equal(dispatcher.registered, 1, 'if store has registered with dispatcher');
+
+  teardown();
+});
+
+Tinytest.add('Store - should not register helpers, actions or call onCreated ' +
+    'when create is called on an already created store', function (test) {
+
+  setup();
+
+  test.equal(created, 1);
+  test.equal(store.count, 0);
+  test.isNotUndefined(store.getCount);
+  test.isTrue(store.created(),'created function should be true');
+  test.equal(dispatcher.registered, 1, 'if store has registered with dispatcher');
+
+  create();
+
+  test.equal(created, 1);
   test.equal(store.count, 0);
   test.isNotUndefined(store.getCount);
   test.isTrue(store.created(),'created function should be true');
