@@ -119,7 +119,7 @@ Store.prototype = {
 				// TODO: Stop leakage
 				console.log('args ', args);
 
-				func.apply(this, args);
+				func.apply(self, args);
 			}
 		});
 	},
