@@ -103,6 +103,7 @@ Store.prototype = {
 			var actionType = null;
 			var args;
 			var func;
+			console.log('arguments ', arguments);
 			if(typeof arguments[0] === 'string') {
 				// if arguments[0] is string
 				// TODO: Throw error if not
@@ -116,8 +117,9 @@ Store.prototype = {
 
 				args = Array.prototype.slice.call(arguments, 1);
 				// TODO: Stop leakage
+				console.log('args ', args);
 
-				func.apply(args);
+				func.apply(this, args);
 			}
 		});
 	},
@@ -184,7 +186,7 @@ Store.prototype = {
 	},
 
 	/**
-	 * @summary Initiate the store. Runs onCreated functions and
+	 * @summary Initiate the store. Runs onCreated functions,
 	 * registers itself with the dispatcher, and makes its helpers available
 	 * in templates.
 	 * @namespace Store.create
@@ -205,6 +207,8 @@ Store.prototype = {
 			}
 			self._registerHelpers();
 			self._created = true;
+		} else {
+			console.log('Trying to create store that already exists: ' + self.name);
 		}
 	},
 
