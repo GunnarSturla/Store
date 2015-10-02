@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'gunnarsturla-meteorflux-store',
+  name: 'gunnarsturla:meteorflux-store',
   version: '1.0.0',
   // Brief, one-line summary of the package.
   summary: "A Store class to simplify following Facebook's Flux architecture in Meteor",
@@ -12,7 +12,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.use('templating', 'client');
-  api.use('meteorflux-dispatcher');
+  api.use('meteorflux:dispatcher');
   api.use('underscore');
   api.versionsFrom('1.1.0.2');
   api.addFiles('store.js');
