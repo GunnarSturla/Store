@@ -83,7 +83,7 @@ Store.prototype = {
 			self._actions[key] = _.bind(action, self);
 		});
 
-		// Register actions is the store has already been initiated
+		// Register actions if the store has already been initiated
 		// This happens if create() is called before the actions are
 		// defined
 		if(this._created && !self._tokenId) {
@@ -103,7 +103,6 @@ Store.prototype = {
 			var actionType = null;
 			var args;
 			var func;
-			console.log('arguments ', arguments);
 			if(typeof arguments[0] === 'string') {
 				// if arguments[0] is string
 				// TODO: Throw error if not
@@ -117,7 +116,6 @@ Store.prototype = {
 
 				args = Array.prototype.slice.call(arguments, 1);
 				// TODO: Stop leakage
-				console.log('args ', args);
 
 				func.apply(self, args);
 			}
