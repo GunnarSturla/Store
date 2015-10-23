@@ -5,11 +5,9 @@ The store manages the app state by taking dispatches from the dispatcher, updati
 the app state and exposing helpers for views/templates to include.
 
 ## Installation
-This package has not yet been published, but you can clone/copy it into a
-`project_root/packages/foldername` folder and then add it with `meteor add foldername`.
+`$ meteor add gunnarsturla:flux-store`
 
-You will also need to install the [dispatcher](#dispatcher) package in the same way.
-
+Flux-store needs a dispatcher to run. It's built with a slightly modified version of [`meteorflux:dispatcher`](https://github.com/worona/meteorflux/tree/devel/packages/dispatcher) that you can find in a [fork of the repository, here](https://github.com/GunnarSturla/dispatcher). For now, you will need to clone this dispatcher into your `packages` folder and install it using `$ meteor add meteorflux:dispatcher`. I have submitted a pullrequest to the original project, so hopefully these shenanigans won't be neccessary in the future.
 
 ## Flux
 ![Diagram of data flow in Flux](https://facebook.github.io/flux/img/flux-simple-f8-diagram-with-client-action-1300w.png)
