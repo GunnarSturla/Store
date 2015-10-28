@@ -12,7 +12,7 @@ Package.describe({
 
 Package.onUse(function(api) {
   api.use('templating', 'client');
-  api.use('meteorflux:dispatcher');
+  api.use('gunnarsturla:dispatcher@1.1.1');
   api.use('underscore');
   api.versionsFrom('1.1.0.2');
   api.addFiles('store.js');
